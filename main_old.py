@@ -26,46 +26,67 @@ pygame.display.set_caption('PyGame Snake')
 pyClock = pygame.time.Clock()
 
 koniecPracy = False
+kwadracik = pygame.Rect(10,10,50,50)
+ruchomyKwadracik = pygame.Rect(0,0,20,20)
+ruchomyKwadracik.center = screenCenter
+numerKoloruKwadratu = 0
+
+predkoscX = 1
+predkoscY = 2
 
 kierunekRuchu = KIERUNEK_PRAWO
 predkoscGracza = 3
 
 #Tworzenie sprite'a
-playerSprite = pygame.sprite.Sprite()
+pierwszySprite = pygame.sprite.Sprite()
 #Sprite image
-playerSprite.image = pygame.Surface((30, 30))
-playerSprite.image.fill(NIEBIESKI)
+# monsterImage = pygame.image.load('images/monster.png').convert_alpha()
+# monsterImage = pygame.transform.scale(monsterImage,(100,100))
+# pierwszySprite.image = monsterImage
+pierwszySprite.image = pygame.Surface((30,30))
+pierwszySprite.image.fill(NIEBIESKI)
 #Sprite rect
-playerSprite.rect = playerSprite.image.get_rect()
-playerSprite.rect.center = screenCenter
+pierwszySprite.rect = pierwszySprite.image.get_rect()
+pierwszySprite.rect.center = screenCenter
 
 
 #Grupa sprite'ów
 grupaSprite = pygame.sprite.Group()
-grupaSprite.add(playerSprite)
+grupaSprite.add(pierwszySprite)
 
 
 while not koniecPracy:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             koniecPracy = True
+        if event.type == pygame.MOUSEBUTTONUP:
+            mousePosition = pygame.mouse.get_pos()
+            ifCollide = kwadracik.collidepoint(mousePosition)
+            if ifCollide:
+                if numerKoloruKwadratu < len(kolory)-1:
+                    numerKoloruKwadratu += 1
+                else:
+                    numerKoloruKwadratu = 0
 
 
-    if playerSprite.rect.bottom > screenSize[1]:
-        predkoscGracza = 0
-        playerSprite.rect.bottom = screenSize[1]
+    ruchomyKwadracik.left += predkoscX
+    ruchomyKwadracik.top += predkoscY
 
-    if playerSprite.rect.right > screenSize[0]:
-        predkoscGracza = 0
-        playerSprite.rect.right = screenSize[0]
+    if ruchomyKwadracik.bottom > screenSize[1]:
+        predkoscY = predkoscY*-1
+        ruchomyKwadracik.bottom = screenSize[1]
 
-    if playerSprite.rect.top < 0:
-        predkoscGracza = 0
-        playerSprite.rect.top = 0
+    if ruchomyKwadracik.right > screenSize[0]:
+        predkoscX *= -1
+        ruchomyKwadracik.right = screenSize[0]
 
-    if playerSprite.rect.left < 0:
-        predkoscGracza = 0
-        playerSprite.rect.left = 0
+    if ruchomyKwadracik.top < 0:
+        predkoscY *= -1
+        ruchomyKwadracik.top = 0
+
+    if ruchomyKwadracik.left < 0:
+        predkoscX *= -1
+        ruchomyKwadracik.left = 0
 
 
 
@@ -84,17 +105,19 @@ while not koniecPracy:
 
     #Ruch gracza
     if kierunekRuchu == KIERUNEK_PRAWO:
-        playerSprite.rect.left += predkoscGracza
+        pierwszySprite.rect.left += predkoscGracza
     elif kierunekRuchu == KIERUNEK_LEWO:
-        playerSprite.rect.left -= predkoscGracza
+        pierwszySprite.rect.left -= predkoscGracza
     elif kierunekRuchu == KIERUNEK_GORA:
-        playerSprite.rect.top -= predkoscGracza
+        pierwszySprite.rect.top -= predkoscGracza
     elif kierunekRuchu == KIERUNEK_DOL:
-        playerSprite.rect.top += predkoscGracza
+        pierwszySprite.rect.top += predkoscGracza
 
 
     #Rysowanie
     display.fill(SZARY)
+    pygame.draw.rect(display, ZIELONY, ruchomyKwadracik)
+    pygame.draw.rect(display,kolory[numerKoloruKwadratu],kwadracik)
 
     grupaSprite.update()
     grupaSprite.draw(display)
