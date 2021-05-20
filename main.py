@@ -10,6 +10,8 @@ KIERUNEK_PRAWO = 1
 KIERUNEK_DOL = 2
 KIERUNEK_LEWO = 3
 
+PLAYER_SPEED = 5
+
 import pygame
 from win32api import GetSystemMetrics
 
@@ -28,7 +30,12 @@ pyClock = pygame.time.Clock()
 koniecPracy = False
 
 kierunekRuchu = KIERUNEK_PRAWO
-predkoscGracza = 3
+currentPlayerSpeed = PLAYER_SPEED
+
+endGameFont = pygame.font.SysFont(None,150,bold=True)
+endGameLabel = endGameFont.render('KONIEC GRY',1,CZERWONY)
+showEndGameLabel = False
+
 
 #Tworzenie sprite'a
 playerSprite = pygame.sprite.Sprite()
@@ -39,58 +46,61 @@ playerSprite.image.fill(NIEBIESKI)
 playerSprite.rect = playerSprite.image.get_rect()
 playerSprite.rect.center = screenCenter
 
-
 #Grupa sprite'ów
 grupaSprite = pygame.sprite.Group()
 grupaSprite.add(playerSprite)
-
 
 while not koniecPracy:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             koniecPracy = True
-
+        elif event.type == pygame.MOUSEBUTTONUP:
+            showEndGameLabel = False
+            playerSprite.rect.center = screenCenter
+            currentPlayerSpeed = PLAYER_SPEED
+            kierunekRuchu = KIERUNEK_PRAWO
 
     if playerSprite.rect.bottom > screenSize[1]:
-        predkoscGracza = 0
+        currentPlayerSpeed = 0
         playerSprite.rect.bottom = screenSize[1]
+        showEndGameLabel = True
 
     if playerSprite.rect.right > screenSize[0]:
-        predkoscGracza = 0
+        currentPlayerSpeed = 0
         playerSprite.rect.right = screenSize[0]
+        showEndGameLabel = True
 
     if playerSprite.rect.top < 0:
-        predkoscGracza = 0
+        currentPlayerSpeed = 0
         playerSprite.rect.top = 0
+        showEndGameLabel = True
 
     if playerSprite.rect.left < 0:
-        predkoscGracza = 0
+        currentPlayerSpeed = 0
         playerSprite.rect.left = 0
-
-
+        showEndGameLabel = True
 
     nacisnieteKlawisze = pygame.key.get_pressed()
 
-    #Nacisniety klawisz D i kierunekRuchu jest inny niz KIERUNEK_LEWO
     if nacisnieteKlawisze[pygame.K_d] and kierunekRuchu != KIERUNEK_LEWO:
         kierunekRuchu = KIERUNEK_PRAWO
     if nacisnieteKlawisze[pygame.K_a] and  kierunekRuchu != KIERUNEK_PRAWO:
         kierunekRuchu = KIERUNEK_LEWO
-    if nacisnieteKlawisze[pygame.K_w] :
+    if nacisnieteKlawisze[pygame.K_w] and kierunekRuchu != KIERUNEK_DOL:
         kierunekRuchu = KIERUNEK_GORA
-    if nacisnieteKlawisze[pygame.K_s] :
+    if nacisnieteKlawisze[pygame.K_s] and kierunekRuchu != KIERUNEK_GORA:
         kierunekRuchu = KIERUNEK_DOL
 
 
     #Ruch gracza
     if kierunekRuchu == KIERUNEK_PRAWO:
-        playerSprite.rect.left += predkoscGracza
+        playerSprite.rect.left += currentPlayerSpeed
     elif kierunekRuchu == KIERUNEK_LEWO:
-        playerSprite.rect.left -= predkoscGracza
+        playerSprite.rect.left -= currentPlayerSpeed
     elif kierunekRuchu == KIERUNEK_GORA:
-        playerSprite.rect.top -= predkoscGracza
+        playerSprite.rect.top -= currentPlayerSpeed
     elif kierunekRuchu == KIERUNEK_DOL:
-        playerSprite.rect.top += predkoscGracza
+        playerSprite.rect.top += currentPlayerSpeed
 
 
     #Rysowanie
@@ -98,6 +108,10 @@ while not koniecPracy:
 
     grupaSprite.update()
     grupaSprite.draw(display)
+
+    if showEndGameLabel:
+        endGameLabelRect = endGameLabel.get_rect()
+        display.blit(endGameLabel,(screenCenter[0]-endGameLabelRect.width//2,screenCenter[1]-endGameLabelRect.height//2))
 
     pygame.display.flip()
     pyClock.tick(30)
