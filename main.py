@@ -11,7 +11,7 @@ KIERUNEK_PRAWO = 1
 KIERUNEK_DOL = 2
 KIERUNEK_LEWO = 3
 
-ROZMIAR_GRACZA = 30
+ROZMIAR_GRACZA = 50
 
 PLAYER_SPEED = ROZMIAR_GRACZA
 
@@ -116,9 +116,10 @@ while not koniecPracy:
     #Rysowanie
     display.fill(SZARY)
 
-    for wiersz in range(liczbaWierszy):
+    for wiersz in range(liczbaWierszy+1):
         pygame.draw.line(display,BIALY,(0,ROZMIAR_GRACZA*wiersz),(windowWidth,ROZMIAR_GRACZA*wiersz))
-
+    for kolumna in range(liczbaKolumn+1):
+        pygame.draw.line(display,BIALY,(ROZMIAR_GRACZA*kolumna,0),(ROZMIAR_GRACZA*kolumna,windowHeight))
 
     grupaSprite.update()
     grupaSprite.draw(display)
