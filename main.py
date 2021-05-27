@@ -3,6 +3,7 @@ ZIELONY = (0,255,0)
 NIEBIESKI = (0,0,255)
 BORDOWY = (125,30,50)
 SZARY = (200,200,200)
+BIALY = (255,255,255)
 kolory = [CZERWONY,ZIELONY,NIEBIESKI,BORDOWY]
 
 KIERUNEK_GORA = 0
@@ -10,7 +11,9 @@ KIERUNEK_PRAWO = 1
 KIERUNEK_DOL = 2
 KIERUNEK_LEWO = 3
 
-PLAYER_SPEED = 5
+ROZMIAR_GRACZA = 30
+
+PLAYER_SPEED = ROZMIAR_GRACZA
 
 import pygame
 from win32api import GetSystemMetrics
@@ -27,6 +30,9 @@ display_rect = display.get_rect()
 pygame.display.set_caption('PyGame Snake')
 pyClock = pygame.time.Clock()
 
+liczbaWierszy = windowHeight // ROZMIAR_GRACZA
+liczbaKolumn = windowWidth // ROZMIAR_GRACZA
+
 koniecPracy = False
 
 kierunekRuchu = KIERUNEK_PRAWO
@@ -40,7 +46,7 @@ showEndGameLabel = False
 #Tworzenie sprite'a
 playerSprite = pygame.sprite.Sprite()
 #Sprite image
-playerSprite.image = pygame.Surface((30, 30))
+playerSprite.image = pygame.Surface((ROZMIAR_GRACZA, ROZMIAR_GRACZA))
 playerSprite.image.fill(NIEBIESKI)
 #Sprite rect
 playerSprite.rect = playerSprite.image.get_rect()
@@ -50,7 +56,10 @@ playerSprite.rect.center = screenCenter
 grupaSprite = pygame.sprite.Group()
 grupaSprite.add(playerSprite)
 
+numerIteracji = 0
+
 while not koniecPracy:
+    numerIteracji = (numerIteracji+1)%8
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             koniecPracy = True
@@ -93,18 +102,23 @@ while not koniecPracy:
 
 
     #Ruch gracza
-    if kierunekRuchu == KIERUNEK_PRAWO:
-        playerSprite.rect.left += currentPlayerSpeed
-    elif kierunekRuchu == KIERUNEK_LEWO:
-        playerSprite.rect.left -= currentPlayerSpeed
-    elif kierunekRuchu == KIERUNEK_GORA:
-        playerSprite.rect.top -= currentPlayerSpeed
-    elif kierunekRuchu == KIERUNEK_DOL:
-        playerSprite.rect.top += currentPlayerSpeed
+    if numerIteracji == 0:
+        if kierunekRuchu == KIERUNEK_PRAWO:
+            playerSprite.rect.left += currentPlayerSpeed
+        elif kierunekRuchu == KIERUNEK_LEWO:
+            playerSprite.rect.left -= currentPlayerSpeed
+        elif kierunekRuchu == KIERUNEK_GORA:
+            playerSprite.rect.top -= currentPlayerSpeed
+        elif kierunekRuchu == KIERUNEK_DOL:
+            playerSprite.rect.top += currentPlayerSpeed
 
 
     #Rysowanie
     display.fill(SZARY)
+
+    for wiersz in range(liczbaWierszy):
+        pygame.draw.line(display,BIALY,(0,ROZMIAR_GRACZA*wiersz),(windowWidth,ROZMIAR_GRACZA*wiersz))
+
 
     grupaSprite.update()
     grupaSprite.draw(display)
