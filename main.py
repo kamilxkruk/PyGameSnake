@@ -1,37 +1,24 @@
-CZERWONY = (255,0,0)
-ZIELONY = (0,255,0)
-NIEBIESKI = (0,0,255)
-BORDOWY = (125,30,50)
-SZARY = (200,200,200)
-BIALY = (255,255,255)
-kolory = [CZERWONY,ZIELONY,NIEBIESKI,BORDOWY]
-
-KIERUNEK_GORA = 0
-KIERUNEK_PRAWO = 1
-KIERUNEK_DOL = 2
-KIERUNEK_LEWO = 3
-
-ROZMIAR_GRACZA = 50
-
-PLAYER_SPEED = ROZMIAR_GRACZA
-
 import pygame
 from win32api import GetSystemMetrics
+from ustawienia import *
+from Model.PunktSprite import PunktSprite
 
 pygame.init()
 
 windowWidth = int(GetSystemMetrics(0) * 0.8)
 windowHeight = int(GetSystemMetrics(1) * 0.8)
 
-screenSize = (windowWidth,windowHeight)
+liczbaWierszy = windowHeight // ROZMIAR_GRACZA
+liczbaKolumn = windowWidth // ROZMIAR_GRACZA
+
+screenSize = (liczbaKolumn*ROZMIAR_GRACZA,liczbaWierszy*ROZMIAR_GRACZA)
 screenCenter = (screenSize[0]//2,screenSize[1]//2)
 display = pygame.display.set_mode(screenSize)
 display_rect = display.get_rect()
 pygame.display.set_caption('PyGame Snake')
 pyClock = pygame.time.Clock()
 
-liczbaWierszy = windowHeight // ROZMIAR_GRACZA
-liczbaKolumn = windowWidth // ROZMIAR_GRACZA
+
 
 koniecPracy = False
 
@@ -42,6 +29,10 @@ endGameFont = pygame.font.SysFont(None,150,bold=True)
 endGameLabel = endGameFont.render('KONIEC GRY',1,CZERWONY)
 showEndGameLabel = False
 
+punktacja = 0
+punktacjaFont = pygame.font.SysFont(None,30,bold=True)
+punktacjaLabel = punktacjaFont.render('Punkty: 0',1,CZARNY)
+
 
 #Tworzenie sprite'a
 playerSprite = pygame.sprite.Sprite()
@@ -50,11 +41,15 @@ playerSprite.image = pygame.Surface((ROZMIAR_GRACZA, ROZMIAR_GRACZA))
 playerSprite.image.fill(NIEBIESKI)
 #Sprite rect
 playerSprite.rect = playerSprite.image.get_rect()
-playerSprite.rect.center = screenCenter
+playerSprite.rect.topleft = (liczbaKolumn//2*ROZMIAR_GRACZA,liczbaWierszy//2*ROZMIAR_GRACZA)
 
 #Grupa sprite'ów
 grupaSprite = pygame.sprite.Group()
 grupaSprite.add(playerSprite)
+
+
+grupaPunktSprite = pygame.sprite.Group()
+grupaPunktSprite.add(PunktSprite(5,3))
 
 numerIteracji = 0
 
@@ -65,7 +60,7 @@ while not koniecPracy:
             koniecPracy = True
         elif event.type == pygame.MOUSEBUTTONUP:
             showEndGameLabel = False
-            playerSprite.rect.center = screenCenter
+            playerSprite.rect.topleft = (liczbaKolumn//2*ROZMIAR_GRACZA,liczbaWierszy//2*ROZMIAR_GRACZA)
             currentPlayerSpeed = PLAYER_SPEED
             kierunekRuchu = KIERUNEK_PRAWO
 
@@ -124,9 +119,15 @@ while not koniecPracy:
     grupaSprite.update()
     grupaSprite.draw(display)
 
+    grupaPunktSprite.update()
+    grupaPunktSprite.draw(display)
+
     if showEndGameLabel:
         endGameLabelRect = endGameLabel.get_rect()
         display.blit(endGameLabel,(screenCenter[0]-endGameLabelRect.width//2,screenCenter[1]-endGameLabelRect.height//2))
+
+    # punktacjaLabel = punktacjaFont.render('Punkty: '+str(punktacja),1,CZARNY)
+    display.blit(punktacjaLabel,(10,10))
 
     pygame.display.flip()
     pyClock.tick(30)
