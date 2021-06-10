@@ -1,6 +1,7 @@
 import pygame
 from pygame.sprite import Sprite
 from ustawienia import *
+from time import time
 
 class PunktSprite(Sprite):
 
@@ -10,3 +11,4 @@ class PunktSprite(Sprite):
         self.image.fill(ZOLTY)
         self.rect = self.image.get_rect()
         self.rect.topleft = ((numerKratkiX-1)*ROZMIAR_GRACZA,(numerKratkiY-1)*ROZMIAR_GRACZA)
+        self.czasUtworzenia = time()

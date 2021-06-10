@@ -2,6 +2,8 @@ import pygame
 from win32api import GetSystemMetrics
 from ustawienia import *
 from Model.PunktSprite import PunktSprite
+from random import randint
+import time
 
 pygame.init()
 
@@ -54,6 +56,7 @@ grupaPunktSprite.add(PunktSprite(5,3),PunktSprite(8,5))
 
 
 numerIteracji = 0
+czasOstatnioWygenerowanegoPunktu = time.time()
 
 while not koniecPracy:
     numerIteracji = (numerIteracji+1)%8
@@ -97,6 +100,21 @@ while not koniecPracy:
     if nacisnieteKlawisze[pygame.K_s] and kierunekRuchu != KIERUNEK_GORA:
         kierunekRuchu = KIERUNEK_DOL
 
+    obecnyCzas = time.time()
+
+    #Generowanie punktów
+    if obecnyCzas - czasOstatnioWygenerowanegoPunktu > 5:
+        randomX = randint(1,liczbaKolumn)
+        randomY = randint(1, liczbaWierszy)
+
+        losowyPunkt = PunktSprite(randomX,randomY)
+        grupaPunktSprite.add(losowyPunkt)
+        czasOstatnioWygenerowanegoPunktu = obecnyCzas
+
+    #Usuwanie punktów
+    for punkt in grupaPunktSprite:
+        if obecnyCzas - punkt.czasUtworzenia > 6:
+            grupaPunktSprite.remove(punkt)
 
     #Ruch gracza
     if numerIteracji == 0:
@@ -109,7 +127,7 @@ while not koniecPracy:
         elif kierunekRuchu == KIERUNEK_DOL:
             playerSprite.rect.top += currentPlayerSpeed
 
-        czyZdobytoPunkt = pygame.sprite.spritecollide(playerSprite,grupaPunktSprite,False)
+        czyZdobytoPunkt = pygame.sprite.spritecollide(playerSprite,grupaPunktSprite,True)
         if czyZdobytoPunkt:
             punktacja += 1
             punktacjaLabel = punktacjaFont.render('Punkty: '+ str(punktacja), 1, CZARNY)
