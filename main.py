@@ -49,7 +49,9 @@ grupaSprite.add(playerSprite)
 
 
 grupaPunktSprite = pygame.sprite.Group()
-grupaPunktSprite.add(PunktSprite(5,3))
+
+grupaPunktSprite.add(PunktSprite(5,3),PunktSprite(8,5))
+
 
 numerIteracji = 0
 
@@ -106,6 +108,11 @@ while not koniecPracy:
             playerSprite.rect.top -= currentPlayerSpeed
         elif kierunekRuchu == KIERUNEK_DOL:
             playerSprite.rect.top += currentPlayerSpeed
+
+        czyZdobytoPunkt = pygame.sprite.spritecollide(playerSprite,grupaPunktSprite,False)
+        if czyZdobytoPunkt:
+            punktacja += 1
+            punktacjaLabel = punktacjaFont.render('Punkty: '+ str(punktacja), 1, CZARNY)
 
 
     #Rysowanie
