@@ -112,8 +112,10 @@ while not koniecPracy:
         czasOstatnioWygenerowanegoPunktu = obecnyCzas
 
     #Usuwanie punktów
+
+    czasWyswietlaniaPunktu = 6
     for punkt in grupaPunktSprite:
-        if obecnyCzas - punkt.czasUtworzenia > 6:
+        if obecnyCzas - punkt.czasUtworzenia > czasWyswietlaniaPunktu:
             grupaPunktSprite.remove(punkt)
 
     #Ruch gracza
