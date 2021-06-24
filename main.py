@@ -191,6 +191,10 @@ display_rect = display.get_rect()
 pygame.display.set_caption('PyGame Snake')
 pyClock = pygame.time.Clock()
 
+#Ladowanie dźwięków
+# odtwarzaczMuzy = pygame.mixer.init()
+# mojDzwiek = pygame.mixer.music.load('sounds/dzwiek.mp3')
+# pygame.mixer.music.play()
 
 
 koniecPracy = False
@@ -210,7 +214,25 @@ punktacjaLabel = punktacjaFont.render('Punkty: 0',1,CZARNY)
 #Tworzenie sprite'a
 playerSprite = pygame.sprite.Sprite()
 #Sprite image
-playerSprite.image = pygame.image.load('images/monster_trimmed.png')
+# snakeHeadImageRight = pygame.image.load('images/oldman_head.png')
+# snakeHeadImageRight = pygame.transform.scale(snakeHeadImageRight,(50,50))
+
+snakeHeadImageRight = pygame.image.load('images/snake_head.png')
+
+snakeBodyImageRight = pygame.image.load('images/oldman_body.png')
+snakeBodyImageRight = pygame.transform.scale(snakeBodyImageRight,(50,50))
+
+snakeTailImageRight = pygame.image.load('images/oldman_legs.png')
+snakeTailImageRight = pygame.transform.scale(snakeTailImageRight,(50,50))
+
+snakeHeadImages = {
+    "RIGHT": snakeHeadImageRight,
+    "DOWN": pygame.transform.rotate(snakeHeadImageRight,-90),
+    "LEFT": pygame.transform.rotate(snakeHeadImageRight,-180),
+    "UP": pygame.transform.rotate(snakeHeadImageRight,90)
+}
+
+playerSprite.image = snakeHeadImages["RIGHT"]
 playerSprite.image = pygame.transform.scale(playerSprite.image,(50,50))
 
 # playerSprite.image = pygame.Surface((ROZMIAR_GRACZA, ROZMIAR_GRACZA))
@@ -241,7 +263,7 @@ numerIteracji = 0
 czasOstatnioWygenerowanegoPunktu = time.time()
 
 while not koniecPracy:
-    numerIteracji = (numerIteracji+1)%8
+    numerIteracji = (numerIteracji+1)%6
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             koniecPracy = True
@@ -250,6 +272,10 @@ while not koniecPracy:
             playerSprite.rect.topleft = (liczbaKolumn//2*ROZMIAR_GRACZA,liczbaWierszy//2*ROZMIAR_GRACZA)
             currentPlayerSpeed = PLAYER_SPEED
             kierunekRuchu = KIERUNEK_PRAWO
+            playerSprite.image = snakeHeadImages["RIGHT"]
+            punktacja = 0
+            punktacjaLabel = punktacjaFont.render('Punkty: ' + str(punktacja), 1, CZARNY)
+            bodySegmentList.clear()
 
     if playerSprite.rect.bottom > screenSize[1]:
         currentPlayerSpeed = 0
@@ -275,74 +301,88 @@ while not koniecPracy:
 
     if nacisnieteKlawisze[pygame.K_d] and kierunekRuchu != KIERUNEK_LEWO:
         kierunekRuchu = KIERUNEK_PRAWO
+        playerSprite.image = snakeHeadImages["RIGHT"]
     if nacisnieteKlawisze[pygame.K_a] and  kierunekRuchu != KIERUNEK_PRAWO:
         kierunekRuchu = KIERUNEK_LEWO
+        playerSprite.image = snakeHeadImages["LEFT"]
     if nacisnieteKlawisze[pygame.K_w] and kierunekRuchu != KIERUNEK_DOL:
         kierunekRuchu = KIERUNEK_GORA
+        playerSprite.image = snakeHeadImages["UP"]
     if nacisnieteKlawisze[pygame.K_s] and kierunekRuchu != KIERUNEK_GORA:
         kierunekRuchu = KIERUNEK_DOL
+        playerSprite.image = snakeHeadImages["DOWN"]
+
 
     obecnyCzas = time.time()
 
-    #Generowanie punktów
-    if obecnyCzas - czasOstatnioWygenerowanegoPunktu > 5:
-        randomX = randint(1,liczbaKolumn)
-        randomY = randint(1, liczbaWierszy)
+    if not showEndGameLabel:
+        #Generowanie punktów
+        if obecnyCzas - czasOstatnioWygenerowanegoPunktu > 5:
+            randomX = randint(1,liczbaKolumn)
+            randomY = randint(1, liczbaWierszy)
 
-        losowyPunkt = PunktSprite(randomX,randomY)
-        grupaPunktSprite.add(losowyPunkt)
-        czasOstatnioWygenerowanegoPunktu = obecnyCzas
+            losowyPunkt = PunktSprite(randomX,randomY)
+            grupaPunktSprite.add(losowyPunkt)
+            czasOstatnioWygenerowanegoPunktu = obecnyCzas
 
-    #Usuwanie punktów
-    for punkt in grupaPunktSprite:
-        if obecnyCzas - punkt.czasUtworzenia > 6:
-            grupaPunktSprite.remove(punkt)
+        #Usuwanie punktów
+        for punkt in grupaPunktSprite:
+            if obecnyCzas - punkt.czasUtworzenia > 6:
+                grupaPunktSprite.remove(punkt)
 
-    # Ruch gracza
-    if numerIteracji == 0:
-        headBeforeMove = playerSprite.rect.copy()
+        # Ruch gracza
+        if numerIteracji == 0:
+            headBeforeMove = playerSprite.rect.copy()
 
-        if kierunekRuchu == KIERUNEK_PRAWO:
-            playerSprite.rect.left += currentPlayerSpeed
-        elif kierunekRuchu == KIERUNEK_LEWO:
-            playerSprite.rect.left -= currentPlayerSpeed
-        elif kierunekRuchu == KIERUNEK_GORA:
-            playerSprite.rect.top -= currentPlayerSpeed
-        elif kierunekRuchu == KIERUNEK_DOL:
-            playerSprite.rect.top += currentPlayerSpeed
+            if kierunekRuchu == KIERUNEK_PRAWO:
+                playerSprite.rect.left += currentPlayerSpeed
+            elif kierunekRuchu == KIERUNEK_LEWO:
+                playerSprite.rect.left -= currentPlayerSpeed
+            elif kierunekRuchu == KIERUNEK_GORA:
+                playerSprite.rect.top -= currentPlayerSpeed
+            elif kierunekRuchu == KIERUNEK_DOL:
+                playerSprite.rect.top += currentPlayerSpeed
 
-        for bodySegmentIndex in range(len(bodySegmentList)-1, -1, -1):
+            for bodySegmentIndex in range(len(bodySegmentList)-1, -1, -1):
 
-            if bodySegmentIndex == 0:
-                bodySegmentList[bodySegmentIndex].topleft = headBeforeMove.topleft
-            else:
-                bodySegmentList[bodySegmentIndex].topleft = bodySegmentList[bodySegmentIndex-1].topleft
+                if bodySegmentIndex == 0:
+                    bodySegmentList[bodySegmentIndex].topleft = headBeforeMove.topleft
+                else:
+                    bodySegmentList[bodySegmentIndex].topleft = bodySegmentList[bodySegmentIndex-1].topleft
 
-        czyZdobytoPunkt = pygame.sprite.spritecollide(playerSprite, grupaPunktSprite, True)
-        if czyZdobytoPunkt:
-            punktacja += 1
-            punktacjaLabel = punktacjaFont.render('Punkty: ' + str(punktacja), 1, CZARNY)
-            if not len(bodySegmentList):
-                bodySegmentList.append(headBeforeMove.copy())
-            else:
-                bodySegmentList.append(bodySegmentList[-1].copy())
+            czyZdobytoPunkt = pygame.sprite.spritecollide(playerSprite, grupaPunktSprite, True)
+            if czyZdobytoPunkt:
+                punktacja += 1
+                punktacjaLabel = punktacjaFont.render('Punkty: ' + str(punktacja), 1, CZARNY)
+                if not len(bodySegmentList):
+                    bodySegmentList.append(headBeforeMove.copy())
+                else:
+                    bodySegmentList.append(bodySegmentList[-1].copy())
 
-        # Rysowanie
-        display.fill(SZARY)
+            # Rysowanie
+            display.fill(SZARY)
 
-        for wiersz in range(liczbaWierszy + 1):
-            pygame.draw.line(display, BIALY, (0, ROZMIAR_GRACZA * wiersz), (windowWidth, ROZMIAR_GRACZA * wiersz))
-        for kolumna in range(liczbaKolumn + 1):
-            pygame.draw.line(display, BIALY, (ROZMIAR_GRACZA * kolumna, 0), (ROZMIAR_GRACZA * kolumna, windowHeight))
+            for wiersz in range(liczbaWierszy + 1):
+                pygame.draw.line(display, BIALY, (0, ROZMIAR_GRACZA * wiersz), (windowWidth, ROZMIAR_GRACZA * wiersz))
+            for kolumna in range(liczbaKolumn + 1):
+                pygame.draw.line(display, BIALY, (ROZMIAR_GRACZA * kolumna, 0), (ROZMIAR_GRACZA * kolumna, windowHeight))
 
-        grupaGraczaSprite.update()
-        grupaGraczaSprite.draw(display)
+            grupaGraczaSprite.update()
+            grupaGraczaSprite.draw(display)
 
-        for bodySegment in bodySegmentList:
-            pygame.draw.rect(display, ZIELONY, bodySegment)
+            for id,bodySegment in enumerate(bodySegmentList):
+                losowaLiczbaKoloru = randint(0,len(KOLORY)-1)
+                pygame.draw.rect(display, KOLORY[losowaLiczbaKoloru], bodySegment)
 
-        grupaPunktSprite.update()
-        grupaPunktSprite.draw(display)
+                # if id == len(bodySegmentList)-1:
+                #     display.blit(snakeTailImageRight,bodySegment)
+                # else:
+                #     display.blit(snakeBodyImageRight,bodySegment)
+
+
+
+            grupaPunktSprite.update()
+            grupaPunktSprite.draw(display)
 
     grupaSprite.update()
     grupaSprite.draw(display)
